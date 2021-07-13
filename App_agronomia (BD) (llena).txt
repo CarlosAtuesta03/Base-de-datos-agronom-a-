@@ -1,0 +1,266 @@
+DROP TABLE IF EXISTS administrador CASCADE;
+DROP TABLE IF EXISTS finca CASCADE;
+DROP TABLE IF EXISTS lote CASCADE;
+DROP TABLE IF EXISTS cultivo CASCADE;
+DROP TABLE IF EXISTS tipocultivo CASCADE;
+DROP TABLE IF EXISTS operacion CASCADE;
+DROP TABLE IF EXISTS trabajador CASCADE;
+DROP TABLE IF EXISTS traxope CASCADE;
+DROP TABLE IF EXISTS producto CASCADE;
+DROP TABLE IF EXISTS fungicida CASCADE;
+DROP TABLE IF EXISTS fertilizante CASCADE;
+DROP TABLE IF EXISTS insumo CASCADE;
+DROP TABLE IF EXISTS insxope CASCADE;
+DROP TABLE IF EXISTS proveedor CASCADE;
+DROP TABLE IF EXISTS factura CASCADE;
+
+
+create table administrador(
+	adm_cedula int not null,
+	adm_nombre varchar(50) not null,
+	adm_email varchar(50) not null,
+	primary key (adm_cedula)
+);
+
+INSERT INTO administrador (adm_cedula,adm_nombre,adm_email) 
+VALUES (1234,'Jose','Jose_manuel@gmail.com'),
+       (1345,'María','María_cardenas@gmail.com'),
+       (1456,'Camilo','Camilo_bejarano@gmail.com');
+
+	   select * from administrador
+
+
+create table finca(
+	fin_id serial not null,
+	fin_nombre varchar(60) not null,
+	fin_area float not null,
+	fin_descripcion  varchar(255),
+	fin_adm_cedula int not null,
+	primary key (fin_id),
+	foreign key (fin_adm_cedula) references administrador (adm_cedula) on update cascade on delete restrict
+);
+
+INSERT INTO finca (fin_nombre,fin_area,fin_descripcion,fin_adm_cedula) 
+VALUES ('Sol',505.3685,'Es una finca muy amplia',1234),                     --Finca 1
+       ('Lejanías ',255.485,'Es una finca muy retirada del pueblo',1345);   --Finca 2
+	   
+	   	   select * from finca
+	   
+	   
+create table lote(
+	lot_id serial not null,
+	lot_area float not null,
+	lot_descripcion varchar(255),
+	lot_fin_id int not null,
+	primary key (lot_id),
+	foreign key (lot_fin_id) references finca (fin_id) on update cascade on delete restrict
+);
+
+INSERT INTO lote (lot_area,lot_descripcion,lot_fin_id) 
+VALUES (101.0737,'Lote 1',1), -- lote 1
+       (101.0737,'Lote 2',1), -- lote 2
+	   (101.0737,'Lote 3',1), -- lote 3
+	   (101.0737,'Lote 4',1), -- lote 4
+	   (101.0737,'Lote 5',1), -- lote 5
+	   (127.7425,'Lote 1',2), -- lote 6
+	   (127.7425,'Lote 2',2); -- lote 7
+	   
+	   	   select * from lote
+		   
+create table tipocultivo(
+	tip_id serial not null,
+	tip_nombre varchar(60) not null,
+	primary key (tip_id)
+);
+
+INSERT INTO tipocultivo (tip_nombre) 
+VALUES ('Raíces y tubérculos'),  --1
+	   ('Hortalizas'),           --2
+	   ('Cereales'),             --3
+	   ('Frutales');             --4
+
+	   	   select * from tipocultivo
+
+create table cultivo(
+	cul_id serial not null,
+	cul_nombre varchar(60) not null,
+	cul_inicio date default CURRENT_TIMESTAMP ,
+	cul_fin date,
+	cul_cantidad int not null,
+	cul_lot_id int not null,
+	cul_tip_id int not null,
+	primary key (cul_id),
+	foreign key (cul_lot_id) references lote (lot_id) on update cascade on delete restrict,
+	foreign key (cul_tip_id) references tipocultivo (tip_id) on update cascade on delete restrict
+);
+
+INSERT INTO cultivo (cul_nombre,cul_inicio,cul_fin,cul_cantidad,cul_lot_id,cul_tip_id) 
+VALUES ('Yuca','2021/06/14','2022/04/14',100,6,1),      -- cultivo 1 
+       ('Jengibre','2021/06/14','2021/12/14',200,7,1);  -- cultivo 2
+	   
+	   	   	   select * from cultivo
+			   
+create table operacion(
+	ope_id serial not null,
+	ope_nombre varchar(60) not null,
+	ope_tiempo varchar(20),
+	ope_fecha date default CURRENT_TIMESTAMP ,
+	ope_fin date,
+	ope_cul_id int not null,
+	primary key (ope_id),
+	foreign key (ope_cul_id) references cultivo (cul_id) on update cascade on delete restrict
+);		   
+		
+INSERT INTO operacion (ope_nombre,ope_tiempo,ope_fecha,ope_fin,ope_cul_id) 
+VALUES ('Prueba 1','30 minutos','2021/06/22','2021/07/22',1),  --1
+       ('Prueba 2','40 minutos','2021/06/22','2021/07/22',2);  --2
+
+	   	   	   select * from operacion
+			   	   
+create table trabajador(
+	tra_cedula serial not null,
+	tra_nombre varchar(60),
+	tra_telefono bigint not null,
+	tra_foto varchar(255),
+	primary key (tra_cedula)
+);		
+
+INSERT INTO trabajador (tra_nombre,tra_telefono,tra_foto) 
+VALUES ('Juan Carlos',315785249,'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSdPOqRJvJjq5_Lws6om6-nSH095XaDXrHO6yuU-F0MN0ANj0mYpmc_niJz-6WWGkzLyIk&usqp=CAU'),   --1
+       ('Camila B',320458522,'https://cdn.icon-icons.com/icons2/1999/PNG/512/avatar_people_person_profile_user_woman_icon_123357.png');      --2
+	   
+	   	   	   select * from trabajador			   
+create table traxope(
+    tra_cedula serial,
+    ope_id serial,
+	primary key (tra_cedula, ope_id),
+	foreign key (tra_cedula)  references trabajador (tra_cedula) on update cascade on delete restrict,
+	foreign key (ope_id) references operacion (ope_id) on update cascade on delete restrict
+);
+
+INSERT INTO traxope (tra_cedula, ope_id) 
+VALUES  (1,1),
+        (2,2);
+		
+	   	   	   select * from traxope
+		   		   	   
+create table insumo(
+	ins_id serial not null,
+	ins_fechvenci date,
+	primary key (ins_id)
+);			   
+			   
+INSERT INTO insumo (ins_fechvenci) 
+VALUES  ('2021/06/22'),  --1
+        ('2021/06/30');  --2
+		
+	   	   	   select * from insumo	
+			   
+create table insxope(
+    ins_id serial,
+    ope_id serial,
+	primary key (ins_id, ope_id),
+	foreign key (ins_id)  references insumo (ins_id) on update cascade on delete restrict,
+	foreign key (ope_id) references operacion (ope_id) on update cascade on delete restrict
+);
+
+INSERT INTO insxope (ins_id, ope_id) 
+VALUES  (1,1),
+        (2,2);
+		
+	   	   	   select * from insxope
+		
+create table producto(
+	pro_id serial not null,
+	pro_nombre varchar(60) not null,
+	pro_presentacion varchar(60),
+	pro_ins_id int not null,
+	primary key (pro_id),
+	Foreign key(pro_ins_id) references insumo(ins_id) on update cascade on delete restrict
+);
+
+INSERT INTO producto (pro_nombre, pro_presentacion,pro_ins_id ) 
+VALUES  ('Poducto 1','presentacion 1',1),  --1
+        ('Poducto 2','presentacion 2',2);  --2
+		
+	   	   	   select * from producto
+			   
+create table fungicida 
+(
+	pro_id serial not null,
+	niv_toxico int4,
+	primary key (pro_id),
+	Foreign key(pro_id) references producto(pro_id) on update cascade on delete restrict
+);
+
+INSERT INTO fungicida (niv_toxico) 
+VALUES  (7),  --1
+        (7);  --2
+		
+	   	   	   select * from fungicida
+			   
+create table fertilizante 
+(
+	pro_id serial not null,
+	con_nutri int4,
+	primary key (pro_id),
+	Foreign key(pro_id) references producto(pro_id) on update cascade on delete restrict
+);			   
+			   
+INSERT INTO fertilizante (con_nutri) 
+VALUES  (7),  --1
+        (7);  --2
+		
+	   	   	   select * from fertilizante				   
+			   
+create table proveedor(
+	pro_nit int not null,
+	pro_razonsocial varchar(60),
+	pro_email varchar(60),
+	primary key (pro_nit)
+);			   
+			   
+INSERT INTO proveedor (pro_nit,pro_razonsocial,pro_email) 
+VALUES  (1234,'Bien','Hola@hotmail.com'),  --1
+        (2234,'Muy Bien','HolaMundo@hotmail.com');  --2			   
+		
+	   	   	   select * from proveedor	
+			   
+create table factura(
+	fac_id serial not null,
+	fac_fecha date default CURRENT_TIMESTAMP,
+	fac_tipopago varchar(30),
+	fac_valor int not null,
+	fac_cantidad int not null,
+	fac_ins_id int not null,
+	fac_pro_nit int not null,
+	primary key (fac_id),
+	foreign key (fac_ins_id) references insumo(ins_id) on update cascade on delete restrict,
+	foreign key (fac_pro_nit) references proveedor(pro_nit) on update cascade on delete restrict
+);
+
+INSERT INTO factura (fac_fecha,fac_tipopago,fac_valor,fac_cantidad,fac_ins_id,fac_pro_nit) 
+VALUES  ('2021/06/22','Tarjeta',1500000,100,1,1234),  --1
+        ('2021/06/30','Tarjeta',2500000,100,2,2234);  --2			   
+		
+	   	   	   select * from factura		   
+			   
+
+
+
+
+
+
+
+
+private viewController:viewController
+			   
+			   
+			   
+			   
+			   
+			   
+			   
+			   
+			   
+			   
