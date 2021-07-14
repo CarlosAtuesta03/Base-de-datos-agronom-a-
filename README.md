@@ -1,1 +1,1 @@
-Creado en pgadmin4
+Creado en postgresql (pgadmin4)
