@@ -2,5 +2,5 @@
 
 ## Requerido:
 ```
-postgresql, pgAdmin
+postgresql, pgAdmin4
 ```
